@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
-import { db, promptsTable, usersTable, categoriesTable } from "@workspace/db";
-import { eq, desc, ilike, sql } from "drizzle-orm";
+import { db, promptsTable, usersTable, promptLikesTable } from "@workspace/db";
+import { eq, sql, and } from "drizzle-orm";
 
 const router = Router();
 
@@ -19,6 +19,8 @@ function formatPrompt(row: Record<string, unknown>) {
     authorName: row.author_name,
     authorAvatarUrl: row.author_avatar_url,
     copyCount: row.copy_count,
+    likeCount: Number(row.like_count ?? 0),
+    isLikedByMe: row.is_liked_by_me === true || row.is_liked_by_me === "true",
     isFeatured: row.is_featured,
     isAdminCurated: row.is_admin_curated,
     tags: row.tags || [],
@@ -26,16 +28,28 @@ function formatPrompt(row: Record<string, unknown>) {
   };
 }
 
-const BASE_QUERY = `
-  SELECT p.*, c.name as category_name,
-         u.username as author_name, u.avatar_url as author_avatar_url
-  FROM prompts p
-  LEFT JOIN categories c ON p.category_id = c.id
-  LEFT JOIN users u ON p.author_id = u.clerk_id
-`;
+function baseQuery(clerkId?: string) {
+  const likeJoin = clerkId
+    ? `LEFT JOIN prompt_likes pl_me ON pl_me.prompt_id = p.id AND pl_me.clerk_id = '${clerkId.replace(/'/g, "''")}'`
+    : "";
+  const isLikedCol = clerkId
+    ? "CASE WHEN pl_me.id IS NOT NULL THEN true ELSE false END as is_liked_by_me,"
+    : "false as is_liked_by_me,";
+  return `
+    SELECT p.*, c.name as category_name,
+           u.username as author_name, u.avatar_url as author_avatar_url,
+           ${isLikedCol}
+           (SELECT COUNT(*) FROM prompt_likes pl WHERE pl.prompt_id = p.id) as like_count
+    FROM prompts p
+    LEFT JOIN categories c ON p.category_id = c.id
+    LEFT JOIN users u ON p.author_id = u.clerk_id
+    ${likeJoin}
+  `;
+}
 
 // GET /prompts
 router.get("/", async (req, res) => {
+  const { userId } = getAuth(req);
   const { category, search, sort = "newest", page = "1", limit = "20" } = req.query as Record<string, string>;
   const pageNum = Math.max(1, parseInt(page));
   const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
@@ -52,7 +66,7 @@ router.get("/", async (req, res) => {
   };
   const orderBy = orderMap[sort] || "p.created_at DESC";
 
-  const rows = await db.execute(`${BASE_QUERY} ${where} ORDER BY ${orderBy} LIMIT ${limitNum} OFFSET ${offset}`);
+  const rows = await db.execute(`${baseQuery(userId ?? undefined)} ${where} ORDER BY ${orderBy} LIMIT ${limitNum} OFFSET ${offset}`);
   const countResult = await db.execute(`SELECT COUNT(*) as count FROM prompts p LEFT JOIN categories c ON p.category_id = c.id ${where}`);
 
   return res.json({
@@ -84,29 +98,32 @@ router.post("/", async (req, res) => {
     tags: tags || [],
   }).returning();
 
-  const row = await db.execute(`${BASE_QUERY} WHERE p.id = ${prompt.id}`);
+  const row = await db.execute(`${baseQuery(userId)} WHERE p.id = ${prompt.id}`);
   return res.status(201).json(formatPrompt(row.rows[0] as Record<string, unknown>));
 });
 
 // GET /prompts/featured
 router.get("/featured", async (req, res) => {
+  const { userId } = getAuth(req);
   const limit = Math.min(50, parseInt((req.query.limit as string) || "8"));
-  const rows = await db.execute(`${BASE_QUERY} WHERE p.is_featured = true ORDER BY p.created_at DESC LIMIT ${limit}`);
+  const rows = await db.execute(`${baseQuery(userId ?? undefined)} WHERE p.is_featured = true ORDER BY p.created_at DESC LIMIT ${limit}`);
   return res.json((rows.rows as Record<string, unknown>[]).map(formatPrompt));
 });
 
 // GET /prompts/trending
 router.get("/trending", async (req, res) => {
+  const { userId } = getAuth(req);
   const limit = Math.min(50, parseInt((req.query.limit as string) || "10"));
-  const rows = await db.execute(`${BASE_QUERY} ORDER BY p.copy_count DESC LIMIT ${limit}`);
+  const rows = await db.execute(`${baseQuery(userId ?? undefined)} ORDER BY p.copy_count DESC LIMIT ${limit}`);
   return res.json((rows.rows as Record<string, unknown>[]).map(formatPrompt));
 });
 
 // GET /prompts/:id
 router.get("/:id", async (req, res) => {
+  const { userId } = getAuth(req);
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
-  const rows = await db.execute(`${BASE_QUERY} WHERE p.id = ${id}`);
+  const rows = await db.execute(`${baseQuery(userId ?? undefined)} WHERE p.id = ${id}`);
   if (!rows.rows[0]) return res.status(404).json({ error: "Not found" });
   return res.json(formatPrompt(rows.rows[0] as Record<string, unknown>));
 });
@@ -138,7 +155,7 @@ router.patch("/:id", async (req, res) => {
   if (tags !== undefined) updates.tags = tags as string[];
 
   await db.update(promptsTable).set(updates).where(eq(promptsTable.id, id));
-  const row = await db.execute(`${BASE_QUERY} WHERE p.id = ${id}`);
+  const row = await db.execute(`${baseQuery(userId)} WHERE p.id = ${id}`);
   return res.json(formatPrompt(row.rows[0] as Record<string, unknown>));
 });
 
@@ -180,6 +197,39 @@ router.post("/:id/copy", async (req, res) => {
   });
 });
 
+// POST /prompts/:id/like  — toggle like
+router.post("/:id/like", async (req, res) => {
+  const { userId } = getAuth(req);
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
+  const existing = await db.select().from(promptsTable).where(eq(promptsTable.id, id)).limit(1);
+  if (!existing[0]) return res.status(404).json({ error: "Not found" });
+
+  const existingLike = await db.select().from(promptLikesTable)
+    .where(and(eq(promptLikesTable.promptId, id), eq(promptLikesTable.clerkId, userId)))
+    .limit(1);
+
+  let isLikedByMe: boolean;
+  if (existingLike[0]) {
+    await db.delete(promptLikesTable)
+      .where(and(eq(promptLikesTable.promptId, id), eq(promptLikesTable.clerkId, userId)));
+    isLikedByMe = false;
+  } else {
+    await db.insert(promptLikesTable).values({ promptId: id, clerkId: userId });
+    isLikedByMe = true;
+  }
+
+  const countResult = await db.execute(
+    `SELECT COUNT(*) as like_count FROM prompt_likes WHERE prompt_id = ${id}`,
+  );
+  const likeCount = Number((countResult.rows[0] as { like_count: string }).like_count);
+
+  return res.json({ likeCount, isLikedByMe });
+});
+
 // POST /prompts/:id/feature
 router.post("/:id/feature", async (req, res) => {
   const { userId } = getAuth(req);
@@ -198,7 +248,7 @@ router.post("/:id/feature", async (req, res) => {
     .set({ isFeatured: !existing[0].isFeatured })
     .where(eq(promptsTable.id, id));
 
-  const row = await db.execute(`${BASE_QUERY} WHERE p.id = ${id}`);
+  const row = await db.execute(`${baseQuery(userId)} WHERE p.id = ${id}`);
   return res.json(formatPrompt(row.rows[0] as Record<string, unknown>));
 });
 

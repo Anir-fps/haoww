@@ -45,6 +45,8 @@ export const ListPromptsResponse = zod.object({
   "authorName": zod.string().nullish(),
   "authorAvatarUrl": zod.string().nullish(),
   "copyCount": zod.number(),
+  "likeCount": zod.number().optional(),
+  "isLikedByMe": zod.boolean().optional(),
   "isFeatured": zod.boolean(),
   "isAdminCurated": zod.boolean(),
   "tags": zod.array(zod.string()).optional(),
@@ -96,6 +98,8 @@ export const GetFeaturedPromptsResponseItem = zod.object({
   "authorName": zod.string().nullish(),
   "authorAvatarUrl": zod.string().nullish(),
   "copyCount": zod.number(),
+  "likeCount": zod.number().optional(),
+  "isLikedByMe": zod.boolean().optional(),
   "isFeatured": zod.boolean(),
   "isAdminCurated": zod.boolean(),
   "tags": zod.array(zod.string()).optional(),
@@ -126,6 +130,8 @@ export const GetTrendingPromptsResponseItem = zod.object({
   "authorName": zod.string().nullish(),
   "authorAvatarUrl": zod.string().nullish(),
   "copyCount": zod.number(),
+  "likeCount": zod.number().optional(),
+  "isLikedByMe": zod.boolean().optional(),
   "isFeatured": zod.boolean(),
   "isAdminCurated": zod.boolean(),
   "tags": zod.array(zod.string()).optional(),
@@ -154,6 +160,8 @@ export const GetPromptResponse = zod.object({
   "authorName": zod.string().nullish(),
   "authorAvatarUrl": zod.string().nullish(),
   "copyCount": zod.number(),
+  "likeCount": zod.number().optional(),
+  "isLikedByMe": zod.boolean().optional(),
   "isFeatured": zod.boolean(),
   "isAdminCurated": zod.boolean(),
   "tags": zod.array(zod.string()).optional(),
@@ -193,6 +201,8 @@ export const UpdatePromptResponse = zod.object({
   "authorName": zod.string().nullish(),
   "authorAvatarUrl": zod.string().nullish(),
   "copyCount": zod.number(),
+  "likeCount": zod.number().optional(),
+  "isLikedByMe": zod.boolean().optional(),
   "isFeatured": zod.boolean(),
   "isAdminCurated": zod.boolean(),
   "tags": zod.array(zod.string()).optional(),
@@ -223,6 +233,19 @@ export const CopyPromptResponse = zod.object({
 
 
 /**
+ * @summary Toggle like on a prompt (requires auth)
+ */
+export const LikePromptParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const LikePromptResponse = zod.object({
+  "likeCount": zod.number(),
+  "isLikedByMe": zod.boolean()
+})
+
+
+/**
  * @summary Toggle featured status (admin only)
  */
 export const ToggleFeaturePromptParams = zod.object({
@@ -242,6 +265,8 @@ export const ToggleFeaturePromptResponse = zod.object({
   "authorName": zod.string().nullish(),
   "authorAvatarUrl": zod.string().nullish(),
   "copyCount": zod.number(),
+  "likeCount": zod.number().optional(),
+  "isLikedByMe": zod.boolean().optional(),
   "isFeatured": zod.boolean(),
   "isAdminCurated": zod.boolean(),
   "tags": zod.array(zod.string()).optional(),
@@ -363,6 +388,8 @@ export const GetMyPromptsResponseItem = zod.object({
   "authorName": zod.string().nullish(),
   "authorAvatarUrl": zod.string().nullish(),
   "copyCount": zod.number(),
+  "likeCount": zod.number().optional(),
+  "isLikedByMe": zod.boolean().optional(),
   "isFeatured": zod.boolean(),
   "isAdminCurated": zod.boolean(),
   "tags": zod.array(zod.string()).optional(),

@@ -29,6 +29,8 @@ export interface Prompt {
   /** @nullable */
   authorAvatarUrl?: string | null;
   copyCount: number;
+  likeCount?: number;
+  isLikedByMe?: boolean;
   isFeatured: boolean;
   isAdminCurated: boolean;
   tags?: string[];
@@ -70,6 +72,11 @@ export interface CopyResult {
   /** @nullable */
   enhancedText?: string | null;
   copyCount: number;
+}
+
+export interface LikeResult {
+  likeCount: number;
+  isLikedByMe: boolean;
 }
 
 export interface Category {

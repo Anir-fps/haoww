@@ -12,6 +12,7 @@ export const promptsTable = pgTable("prompts", {
   categoryId: integer("category_id").notNull(),
   authorId: text("author_id"),
   copyCount: integer("copy_count").notNull().default(0),
+  likeCount: integer("like_count").notNull().default(0),
   isFeatured: boolean("is_featured").notNull().default(false),
   isAdminCurated: boolean("is_admin_curated").notNull().default(false),
   tags: text("tags").array().notNull().default([]),

@@ -26,6 +26,8 @@ export interface Prompt {
   /** @nullable */
   authorAvatarUrl?: string | null;
   copyCount: number;
+  likeCount?: number;
+  isLikedByMe?: boolean;
   isFeatured: boolean;
   isAdminCurated: boolean;
   tags?: string[];

@@ -14,6 +14,7 @@ export * from './enhanceResult';
 export * from './getFeaturedPromptsParams';
 export * from './getTrendingPromptsParams';
 export * from './healthStatus';
+export * from './likeResult';
 export * from './listPromptsParams';
 export * from './listPromptsSort';
 export * from './platformStats';

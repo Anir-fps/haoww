@@ -27,6 +27,7 @@ import type {
   GetFeaturedPromptsParams,
   GetTrendingPromptsParams,
   HealthStatus,
+  LikeResult,
   ListPromptsParams,
   PlatformStats,
   Prompt,
@@ -737,6 +738,76 @@ export const useCopyPrompt = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getCopyPromptMutationOptions(options));
+    }
+
+export const getLikePromptUrl = (id: number,) => {
+
+
+
+
+  return `/api/prompts/${id}/like`
+}
+
+/**
+ * @summary Toggle like on a prompt (requires auth)
+ */
+export const likePrompt = async (id: number, options?: RequestInit): Promise<LikeResult> => {
+
+  return customFetch<LikeResult>(getLikePromptUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getLikePromptMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof likePrompt>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof likePrompt>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['likePrompt'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof likePrompt>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  likePrompt(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LikePromptMutationResult = NonNullable<Awaited<ReturnType<typeof likePrompt>>>
+
+    export type LikePromptMutationError = ErrorType<void>
+
+    /**
+ * @summary Toggle like on a prompt (requires auth)
+ */
+export const useLikePrompt = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof likePrompt>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof likePrompt>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getLikePromptMutationOptions(options));
     }
 
 export const getToggleFeaturePromptUrl = (id: number,) => {

@@ -221,6 +221,29 @@ paths:
         "404":
           description: Not found
 
+  /prompts/{id}/like:
+    post:
+      operationId: likePrompt
+      tags: [prompts]
+      summary: Toggle like on a prompt (requires auth)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated like count and whether user liked it
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeResult"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+
   /prompts/{id}/feature:
     post:
       operationId: toggleFeaturePrompt
@@ -397,6 +420,10 @@ components:
           type: ["string", "null"]
         copyCount:
           type: integer
+        likeCount:
+          type: integer
+        isLikedByMe:
+          type: boolean
         isFeatured:
           type: boolean
         isAdminCurated:
@@ -479,6 +506,15 @@ components:
           type: ["string", "null"]
         copyCount:
           type: integer
+
+    LikeResult:
+      type: object
+      required: [likeCount, isLikedByMe]
+      properties:
+        likeCount:
+          type: integer
+        isLikedByMe:
+          type: boolean
 
     Category:
       type: object
