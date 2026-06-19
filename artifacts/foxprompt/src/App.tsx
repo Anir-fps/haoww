@@ -2,25 +2,44 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ClerkProvider, useAuth } from "@clerk/react";
+import { useEffect } from "react";
+import { useSyncUser } from "@workspace/api-client-react";
 import NotFound from "@/pages/not-found";
+import FeedPage from "@/pages/feed";
+import EnhancePage from "@/pages/enhance";
+import SubmitPage from "@/pages/submit";
+import ProfilePage from "@/pages/profile";
+import AdminPage from "@/pages/admin";
+import SignInPage from "@/pages/sign-in";
+import SignUpPage from "@/pages/sign-up";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
+});
 
-function Home() {
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Replit Agent is building...</h1>
-        <p className="mt-2 text-sm text-gray-600">Your app will appear here once it's ready.</p>
-      </div>
-    </div>
-  );
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string;
+
+function UserSyncer() {
+  const { isSignedIn } = useAuth();
+  const syncUser = useSyncUser();
+  useEffect(() => {
+    if (isSignedIn) syncUser.mutate(undefined);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSignedIn]);
+  return null;
 }
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={FeedPage} />
+      <Route path="/enhance" component={EnhancePage} />
+      <Route path="/submit" component={SubmitPage} />
+      <Route path="/profile" component={ProfilePage} />
+      <Route path="/admin" component={AdminPage} />
+      <Route path="/sign-in" component={SignInPage} />
+      <Route path="/sign-up" component={SignUpPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -28,14 +47,17 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ClerkProvider publishableKey={clerkPubKey}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <UserSyncer />
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
   );
 }
 
