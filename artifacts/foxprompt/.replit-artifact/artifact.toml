@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "FoxPrompt"
+version = "1.0.0"
+id = "artifacts/foxprompt"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24448
+
+[services.development]
+run = "pnpm --filter @workspace/foxprompt run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/foxprompt", "run", "build" ]
+publicDir = "artifacts/foxprompt/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24448"
+BASE_PATH = "/"

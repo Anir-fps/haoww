@@ -1,0 +1,26 @@
+FoxPrompt is a high-performance, full-stack social platform designed specifically for AI image and video prompt engineering. Modeled after the core mechanics of platforms like pixprompt.in, FoxPrompt allows users to easily browse, share, and copy high-quality generation prompts with a single click.
+The application features a distinct, modern orange-themed brand identity, fluid animations for an elite user experience, and a dual-tier monetization model driven by an intelligent prompt enhancement engine.
+Core Architecture & Tech Stack
+1. Frontend (Snappy, Visual, and Animated)
+Framework: Vite + React + TypeScript (for a lightweight, ultra-fast Single Page Application).
+Styling: Tailwind CSS, utilizing a vibrant, energetic orange color palette (#FF6B00 / amber-500 accents) paired with a clean, dark/light hybrid modern UI.
+Animations: Framer Motion to handle smooth layout transitions, hover states on cards, copy confirmation micro-interactions, and modal animations.
+State Management: Zustand or React Context for clean, lightweight global state (auth, active prompt view).
+2. Backend & Database (Scalable and Secure)
+Server: Node.js with Express and TypeScript.
+Database: PostgreSQL (hosted via Supabase or Neon) managed through Prisma ORM.
+Authentication: Secure JWT-based authentication for user registrations, logins, and session management.
+3. Monetization & AI Integration Layer
+Payment Gateway: Stripe integration handling monthly/yearly subscription tiers.
+Free Tier Features: * Browse user-submitted and admin-curated prompts.
+One-click "Copy Prompt" functionality.
+Prompt Enhancer: An AI-driven text optimization feature (powered by a fast, cost-effective LLM API like GPT-4o-mini or Groq) that automatically transforms basic, low-quality prompts into highly detailed, cinematic instructions for stable diffusion, Midjourney, or DALL-E.
+Premium Tier Features (Subscribed Users Only):
+Unlocks direct image and video generation natively on the website.
+API Integrations: Connected to API endpoints like fal.ai or Replicate (running models like Flux, Stable Diffusion XL, or Luma/Runway for video) to render assets directly on screen without redirection.
+User Workflow & Key Features
+The Discovery Feed: A masonry-style grid gallery displaying beautiful AI-generated imagery and videos. Hovering over any card reveals the underlying prompt, a "Quick Copy" button, and an "Enhance" button.
+The Prompt Workflow: * A user pastes a basic prompt: "A fox in the woods." * They click Enhance. The backend calls the LLM API to rewrite it into a professional, high-fidelity prompt: "A majestic red fox stepping through morning mist in an ancient, sun-dappled pine forest, cinematic lighting, 8k resolution, photorealistic, shot on 35mm lens."
+Free users copy this text. Premium users can instantly click Generate to see the new image appear on site.
+Social & Community Layer: Authenticated users can submit their own successful prompts alongside the generated image/video URL, building a crowdsourced repository of AI art assets.
+Admin Curation: An admin dashboard allowing the creator to feature, categorize (e.g., Portrait, Cinematic, Anime, Landscape), or moderate community-submitted prompts.

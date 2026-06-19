@@ -3,13 +3,23 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: FoxPrompt API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: prompts
+    description: Prompt management
+  - name: categories
+    description: Category operations
+  - name: users
+    description: User management
+  - name: enhance
+    description: AI prompt enhancement
+  - name: stats
+    description: Platform statistics
 paths:
   /healthz:
     get:
@@ -24,6 +34,331 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /prompts:
+    get:
+      operationId: listPrompts
+      tags: [prompts]
+      summary: List prompts
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [newest, trending, featured]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of prompts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptListResponse"
+    post:
+      operationId: createPrompt
+      tags: [prompts]
+      summary: Create a new prompt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromptInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Prompt"
+        "401":
+          description: Unauthorized
+
+  /prompts/featured:
+    get:
+      operationId: getFeaturedPrompts
+      tags: [prompts]
+      summary: Get featured prompts
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 8
+      responses:
+        "200":
+          description: Featured prompts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Prompt"
+
+  /prompts/trending:
+    get:
+      operationId: getTrendingPrompts
+      tags: [prompts]
+      summary: Get trending prompts by copy count
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Trending prompts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Prompt"
+
+  /prompts/{id}:
+    get:
+      operationId: getPrompt
+      tags: [prompts]
+      summary: Get a prompt by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Prompt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Prompt"
+        "404":
+          description: Not found
+    patch:
+      operationId: updatePrompt
+      tags: [prompts]
+      summary: Update a prompt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromptUpdate"
+      responses:
+        "200":
+          description: Updated prompt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Prompt"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+    delete:
+      operationId: deletePrompt
+      tags: [prompts]
+      summary: Delete a prompt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+
+  /prompts/{id}/copy:
+    post:
+      operationId: copyPrompt
+      tags: [prompts]
+      summary: Record a copy and return prompt text
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Prompt text with updated copy count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CopyResult"
+        "404":
+          description: Not found
+
+  /prompts/{id}/feature:
+    post:
+      operationId: toggleFeaturePrompt
+      tags: [prompts]
+      summary: Toggle featured status (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated prompt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Prompt"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List all categories with prompt counts
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /enhance:
+    post:
+      operationId: enhancePrompt
+      tags: [enhance]
+      summary: Enhance a prompt using AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnhanceInput"
+      responses:
+        "200":
+          description: Enhanced prompt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnhanceResult"
+        "400":
+          description: Bad request
+
+  /users/me:
+    get:
+      operationId: getMyProfile
+      tags: [users]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+    patch:
+      operationId: updateMyProfile
+      tags: [users]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+
+  /users/sync:
+    post:
+      operationId: syncUser
+      tags: [users]
+      summary: Sync Clerk user to application database
+      responses:
+        "200":
+          description: Synced user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+
+  /stats:
+    get:
+      operationId: getPlatformStats
+      tags: [stats]
+      summary: Get platform statistics
+      responses:
+        "200":
+          description: Platform stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformStats"
+
+  /users/me/prompts:
+    get:
+      operationId: getMyPrompts
+      tags: [users]
+      summary: Get current user's prompts
+      responses:
+        "200":
+          description: User's prompts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Prompt"
+        "401":
+          description: Unauthorized
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +369,192 @@ components:
       required:
         - status
 
+    Prompt:
+      type: object
+      required: [id, text, categoryId, categoryName, authorId, copyCount, isFeatured, isAdminCurated, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: ["string", "null"]
+        text:
+          type: string
+        enhancedText:
+          type: ["string", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        authorId:
+          type: ["string", "null"]
+        authorName:
+          type: ["string", "null"]
+        authorAvatarUrl:
+          type: ["string", "null"]
+        copyCount:
+          type: integer
+        isFeatured:
+          type: boolean
+        isAdminCurated:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+
+    PromptInput:
+      type: object
+      required: [text, categoryId]
+      properties:
+        title:
+          type: string
+        text:
+          type: string
+          minLength: 10
+        enhancedText:
+          type: string
+        imageUrl:
+          type: string
+        videoUrl:
+          type: string
+        categoryId:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+
+    PromptUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        text:
+          type: string
+        enhancedText:
+          type: string
+        imageUrl:
+          type: string
+        videoUrl:
+          type: string
+        categoryId:
+          type: integer
+        isFeatured:
+          type: boolean
+        isAdminCurated:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+
+    PromptListResponse:
+      type: object
+      required: [prompts, total, page, limit]
+      properties:
+        prompts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Prompt"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    CopyResult:
+      type: object
+      required: [text, copyCount]
+      properties:
+        text:
+          type: string
+        enhancedText:
+          type: ["string", "null"]
+        copyCount:
+          type: integer
+
+    Category:
+      type: object
+      required: [id, name, slug, promptCount]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        promptCount:
+          type: integer
+        iconEmoji:
+          type: ["string", "null"]
+
+    EnhanceInput:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          minLength: 3
+        style:
+          type: string
+          enum: [photorealistic, cinematic, anime, illustration, abstract]
+
+    EnhanceResult:
+      type: object
+      required: [enhanced]
+      properties:
+        enhanced:
+          type: string
+        original:
+          type: string
+
+    User:
+      type: object
+      required: [id, clerkId, createdAt]
+      properties:
+        id:
+          type: integer
+        clerkId:
+          type: string
+        username:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        isPremium:
+          type: boolean
+        isAdmin:
+          type: boolean
+        promptCount:
+          type: integer
+        createdAt:
+          type: string
+
+    UserUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+
+    PlatformStats:
+      type: object
+      required: [totalPrompts, totalCopies, totalUsers, topCategories]
+      properties:
+        totalPrompts:
+          type: integer
+        totalCopies:
+          type: integer
+        totalUsers:
+          type: integer
+        topCategories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        featuredCount:
+          type: integer
