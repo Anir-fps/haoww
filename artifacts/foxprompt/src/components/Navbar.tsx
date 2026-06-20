@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { UserButton, useAuth } from "@clerk/react";
-import { Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import foxLogo from "/logo.png";
 
 export function Navbar() {
   const [location] = useLocation();
@@ -16,14 +17,22 @@ export function Navbar() {
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/">
-          <div className="flex items-center gap-2 group cursor-pointer" data-testid="nav-logo">
-            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Zap className="w-4 h-4 text-primary-foreground" fill="currentColor" />
-            </div>
+          <motion.div
+            className="flex items-center gap-2 cursor-pointer"
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            data-testid="nav-logo"
+          >
+            <motion.img
+              src={foxLogo}
+              alt="FoxPrompt"
+              className="w-9 h-9 object-contain drop-shadow-[0_0_6px_rgba(255,107,0,0.5)]"
+              whileHover={{ rotate: [-2, 2, -2, 0], transition: { duration: 0.4 } }}
+            />
             <span className="font-black text-lg tracking-tight">
               Fox<span className="text-primary">Prompt</span>
             </span>
-          </div>
+          </motion.div>
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
