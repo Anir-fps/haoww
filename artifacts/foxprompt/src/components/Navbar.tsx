@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { UserButton, useAuth } from "@clerk/react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import foxLogo from "/logo.png";
 import foxLogoHover from "/logo-hover.png";
@@ -9,6 +9,7 @@ export function Navbar() {
   const [location] = useLocation();
   const { isSignedIn } = useAuth();
   const [hovered, setHovered] = useState(false);
+  const [shineKey, setShineKey] = useState(0);
 
   const navLinks = [
     { href: "/", label: "Discover" },
@@ -23,8 +24,8 @@ export function Navbar() {
           <motion.div
             className="flex items-center gap-2 cursor-pointer select-none"
             data-testid="nav-logo"
-            onHoverStart={() => setHovered(true)}
-            onHoverEnd={() => setHovered(false)}
+            onHoverStart={() => { setHovered(true); setShineKey(k => k + 1); }}
+            onHoverEnd={() => { setHovered(false); setShineKey(k => k + 1); }}
           >
             {/* Logo crossfade container */}
             <div
@@ -49,23 +50,21 @@ export function Navbar() {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               />
 
-              {/* Shine sweep on hover */}
-              <AnimatePresence>
-                {hovered && (
-                  <motion.div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background:
-                        "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)",
-                      backgroundSize: "200% 100%",
-                    }}
-                    initial={{ backgroundPosition: "-100% 0" }}
-                    animate={{ backgroundPosition: "200% 0" }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                  />
-                )}
-              </AnimatePresence>
+              {/* Shine sweep — replays on both enter and leave */}
+              {shineKey > 0 && (
+                <motion.div
+                  key={shineKey}
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background:
+                      "linear-gradient(105deg, transparent 25%, rgba(255,255,255,0.6) 50%, transparent 75%)",
+                    backgroundSize: "200% 100%",
+                  }}
+                  initial={{ backgroundPosition: "-100% 0", opacity: 1 }}
+                  animate={{ backgroundPosition: "220% 0", opacity: [1, 1, 0] }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+              )}
             </div>
 
             <span className="font-black text-lg tracking-tight">
