@@ -1,11 +1,14 @@
 import { Link, useLocation } from "wouter";
 import { UserButton, useAuth } from "@clerk/react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import foxLogo from "/logo.png";
+import foxLogoHover from "/logo-hover.png";
 
 export function Navbar() {
   const [location] = useLocation();
   const { isSignedIn } = useAuth();
+  const [hovered, setHovered] = useState(false);
 
   const navLinks = [
     { href: "/", label: "Discover" },
@@ -20,64 +23,54 @@ export function Navbar() {
           <motion.div
             className="flex items-center gap-2 cursor-pointer select-none"
             data-testid="nav-logo"
-            whileHover="hovered"
-            initial="idle"
+            onHoverStart={() => setHovered(true)}
+            onHoverEnd={() => setHovered(false)}
           >
-            <motion.div
-              className="relative w-9 h-9"
-              variants={{
-                idle: { y: 0, rotate: 0, scale: 1 },
-                hovered: {
-                  y: [-0, -6, -2, -8, 0],
-                  rotate: [0, -4, 3, -2, 0],
-                  scale: [1, 1.12, 1.08, 1.14, 1],
-                  transition: {
-                    duration: 0.6,
-                    ease: "easeInOut",
-                    times: [0, 0.25, 0.45, 0.7, 1],
-                  },
-                },
-              }}
+            {/* Logo crossfade container */}
+            <div
+              className="relative w-9 h-9 overflow-hidden"
+              style={{ borderRadius: 4 }}
             >
+              {/* Default flat logo */}
               <motion.img
                 src={foxLogo}
                 alt="FoxPrompt"
-                className="w-9 h-9 object-contain"
-                variants={{
-                  idle: { filter: "drop-shadow(0 2px 6px rgba(255,107,0,0.3))" },
-                  hovered: {
-                    filter: [
-                      "drop-shadow(0 2px 6px rgba(255,107,0,0.3))",
-                      "drop-shadow(0 8px 20px rgba(255,107,0,0.65))",
-                      "drop-shadow(0 6px 16px rgba(255,107,0,0.5))",
-                    ],
-                    transition: { duration: 0.5 },
-                  },
-                }}
+                className="absolute inset-0 w-full h-full object-contain"
+                animate={{ opacity: hovered ? 0 : 1, scale: hovered ? 0.85 : 1 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
               />
-            </motion.div>
 
-            <motion.span
-              className="font-black text-lg tracking-tight"
-              variants={{
-                idle: { x: 0 },
-                hovered: {
-                  x: [0, 2, 0],
-                  transition: { duration: 0.4, delay: 0.1 },
-                },
-              }}
-            >
-              Fox<motion.span
-                className="text-primary inline-block"
-                variants={{
-                  idle: { color: "#FF6B00" },
-                  hovered: {
-                    color: ["#FF6B00", "#FF8C00", "#FF6B00"],
-                    transition: { duration: 0.5 },
-                  },
-                }}
-              >Prompt</motion.span>
-            </motion.span>
+              {/* Hover detailed logo */}
+              <motion.img
+                src={foxLogoHover}
+                alt=""
+                className="absolute inset-0 w-full h-full object-contain"
+                animate={{ opacity: hovered ? 1 : 0, scale: hovered ? 1 : 1.1 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              />
+
+              {/* Shine sweep on hover */}
+              <AnimatePresence>
+                {hovered && (
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background:
+                        "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)",
+                      backgroundSize: "200% 100%",
+                    }}
+                    initial={{ backgroundPosition: "-100% 0" }}
+                    animate={{ backgroundPosition: "200% 0" }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
+
+            <span className="font-black text-lg tracking-tight">
+              Fox<span className="text-primary">Prompt</span>
+            </span>
           </motion.div>
         </Link>
 
@@ -102,12 +95,18 @@ export function Navbar() {
           {!isSignedIn ? (
             <>
               <Link href="/sign-in">
-                <span data-testid="nav-signin" className="text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
+                <span
+                  data-testid="nav-signin"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                >
                   Sign in
                 </span>
               </Link>
               <Link href="/sign-up">
-                <span data-testid="nav-signup" className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 cursor-pointer transition-colors">
+                <span
+                  data-testid="nav-signup"
+                  className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 cursor-pointer transition-colors"
+                >
                   Get started
                 </span>
               </Link>
@@ -115,7 +114,10 @@ export function Navbar() {
           ) : (
             <>
               <Link href="/profile">
-                <span data-testid="nav-profile" className="text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
+                <span
+                  data-testid="nav-profile"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                >
                   Profile
                 </span>
               </Link>
