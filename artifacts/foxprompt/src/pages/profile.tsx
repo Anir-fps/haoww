@@ -18,7 +18,7 @@ export default function ProfilePage() {
 
   if (!isSignedIn) {
     return (
-      <div className="min-h-screen bg-background dark">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="max-w-md mx-auto px-4 py-24 text-center">
           <h2 className="text-2xl font-bold mb-2">Sign in to view profile</h2>
@@ -33,7 +33,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="max-w-5xl mx-auto px-4 py-12">
         {/* Profile header */}

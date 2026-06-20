@@ -32,7 +32,7 @@ export default function AdminPage() {
 
   if (!isSignedIn || (profile && !profile.isAdmin)) {
     return (
-      <div className="min-h-screen bg-background dark">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="max-w-md mx-auto px-4 py-24 text-center">
           <Shield className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
@@ -74,7 +74,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="max-w-5xl mx-auto px-4 py-12">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">

@@ -37,7 +37,7 @@ export default function SubmitPage() {
 
   if (!isSignedIn) {
     return (
-      <div className="min-h-screen bg-background dark">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="max-w-md mx-auto px-4 py-24 text-center">
           <Sparkles className="w-12 h-12 mx-auto mb-4 text-primary" />
@@ -77,7 +77,7 @@ export default function SubmitPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="max-w-xl mx-auto px-4 py-12">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

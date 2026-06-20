@@ -51,33 +51,33 @@
 }
 
 :root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
+  --button-outline: rgba(0,0,0, .08);
+  --badge-outline: rgba(0,0,0, .04);
   --opaque-button-border-intensity: -8;
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+  --elevate-1: rgba(0,0,0, .02);
+  --elevate-2: rgba(0,0,0, .05);
 
-  /* Light mode colors - defaulting to dark mode vibe for FoxPrompt but providing light mode fallbacks */
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
-  --border: 240 5.9% 90%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-  --card-border: 240 5.9% 90%;
+  /* FoxPrompt Light Theme — warm cream with orange brand */
+  --background: 36 33% 97%;           /* warm off-white #FAF9F7 */
+  --foreground: 222 20% 12%;          /* near-black #181C27 */
+  --border: 220 13% 88%;              /* soft gray border */
+  --card: 0 0% 100%;                  /* pure white cards */
+  --card-foreground: 222 20% 12%;
+  --card-border: 220 13% 91%;
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --popover-border: 240 5.9% 90%;
-  --primary: 25 100% 50%;
+  --popover-foreground: 222 20% 12%;
+  --popover-border: 220 13% 91%;
+  --primary: 25 100% 50%;             /* #FF6B00 orange */
   --primary-foreground: 0 0% 100%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 25 100% 95%;
-  --accent-foreground: 25 100% 50%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --input: 240 5.9% 90%;
+  --secondary: 36 20% 93%;            /* warm light gray */
+  --secondary-foreground: 222 20% 20%;
+  --muted: 36 15% 93%;
+  --muted-foreground: 220 10% 46%;
+  --accent: 25 100% 95%;              /* very light orange tint */
+  --accent-foreground: 25 95% 40%;
+  --destructive: 0 80% 56%;
+  --destructive-foreground: 0 0% 100%;
+  --input: 220 13% 90%;
   --ring: 25 100% 50%;
 
   --app-font-sans: 'Inter', sans-serif;
@@ -94,7 +94,7 @@
   --elevate-2: rgba(255,255,255, .09);
 
   /* FoxPrompt Dark Mode Colors */
-  --background: 240 10% 4%; /* #0A0A0A */
+  --background: 240 10% 4%;
   --foreground: 0 0% 98%;
   --border: 240 4% 16%;
   --card: 240 10% 6%;
@@ -103,7 +103,7 @@
   --popover: 240 10% 6%;
   --popover-foreground: 0 0% 98%;
   --popover-border: 240 4% 16%;
-  --primary: 25 100% 50%; /* #FF6B00 */
+  --primary: 25 100% 50%;
   --primary-foreground: 0 0% 100%;
   --secondary: 240 4% 12%;
   --secondary-foreground: 0 0% 98%;
@@ -150,13 +150,15 @@
   margin-bottom: 1rem;
 }
 
-/* Electric glow effect */
+/* Card hover glow — lighter touch for light mode */
 .neon-glow {
-  box-shadow: 0 0 10px 0px rgba(255, 107, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .neon-glow:hover {
-  box-shadow: 0 0 20px 2px rgba(255, 107, 0, 0.5);
+  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.18), 0 2px 8px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
 }
 
 /* Animated gradient border */

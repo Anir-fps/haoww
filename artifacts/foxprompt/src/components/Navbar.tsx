@@ -26,7 +26,7 @@ export function Navbar() {
             <motion.img
               src={foxLogo}
               alt="FoxPrompt"
-              className="w-9 h-9 object-contain drop-shadow-[0_0_6px_rgba(255,107,0,0.5)]"
+              className="w-9 h-9 object-contain drop-shadow-[0_2px_8px_rgba(255,107,0,0.35)]"
               whileHover={{ rotate: [-2, 2, -2, 0], transition: { duration: 0.4 } }}
             />
             <span className="font-black text-lg tracking-tight">
