@@ -10,6 +10,7 @@ export function Navbar() {
   const { isSignedIn } = useAuth();
   const [hovered, setHovered] = useState(false);
   const [shineKey, setShineKey] = useState(0);
+  const [shineDir, setShineDir] = useState<"in" | "out">("in");
 
   const navLinks = [
     { href: "/", label: "Discover" },
@@ -24,8 +25,8 @@ export function Navbar() {
           <motion.div
             className="flex items-center gap-2 cursor-pointer select-none"
             data-testid="nav-logo"
-            onHoverStart={() => { setHovered(true); setShineKey(k => k + 1); }}
-            onHoverEnd={() => { setHovered(false); setShineKey(k => k + 1); }}
+            onHoverStart={() => { setHovered(true); setShineDir("in"); setShineKey(k => k + 1); }}
+            onHoverEnd={() => { setHovered(false); setShineDir("out"); setShineKey(k => k + 1); }}
           >
             {/* Logo crossfade container */}
             <div
@@ -60,8 +61,8 @@ export function Navbar() {
                       "linear-gradient(105deg, transparent 25%, rgba(255,255,255,0.6) 50%, transparent 75%)",
                     backgroundSize: "200% 100%",
                   }}
-                  initial={{ backgroundPosition: "-100% 0", opacity: 1 }}
-                  animate={{ backgroundPosition: "220% 0", opacity: [1, 1, 0] }}
+                  initial={{ backgroundPosition: shineDir === "in" ? "-100% 0" : "220% 0", opacity: 1 }}
+                  animate={{ backgroundPosition: shineDir === "in" ? "220% 0" : "-100% 0", opacity: [1, 1, 0] }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                 />
               )}
