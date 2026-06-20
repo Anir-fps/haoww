@@ -18,20 +18,66 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/">
           <motion.div
-            className="flex items-center gap-2 cursor-pointer"
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            className="flex items-center gap-2 cursor-pointer select-none"
             data-testid="nav-logo"
+            whileHover="hovered"
+            initial="idle"
           >
-            <motion.img
-              src={foxLogo}
-              alt="FoxPrompt"
-              className="w-9 h-9 object-contain drop-shadow-[0_2px_8px_rgba(255,107,0,0.35)]"
-              whileHover={{ rotate: [-2, 2, -2, 0], transition: { duration: 0.4 } }}
-            />
-            <span className="font-black text-lg tracking-tight">
-              Fox<span className="text-primary">Prompt</span>
-            </span>
+            <motion.div
+              className="relative w-9 h-9"
+              variants={{
+                idle: { y: 0, rotate: 0, scale: 1 },
+                hovered: {
+                  y: [-0, -6, -2, -8, 0],
+                  rotate: [0, -4, 3, -2, 0],
+                  scale: [1, 1.12, 1.08, 1.14, 1],
+                  transition: {
+                    duration: 0.6,
+                    ease: "easeInOut",
+                    times: [0, 0.25, 0.45, 0.7, 1],
+                  },
+                },
+              }}
+            >
+              <motion.img
+                src={foxLogo}
+                alt="FoxPrompt"
+                className="w-9 h-9 object-contain"
+                variants={{
+                  idle: { filter: "drop-shadow(0 2px 6px rgba(255,107,0,0.3))" },
+                  hovered: {
+                    filter: [
+                      "drop-shadow(0 2px 6px rgba(255,107,0,0.3))",
+                      "drop-shadow(0 8px 20px rgba(255,107,0,0.65))",
+                      "drop-shadow(0 6px 16px rgba(255,107,0,0.5))",
+                    ],
+                    transition: { duration: 0.5 },
+                  },
+                }}
+              />
+            </motion.div>
+
+            <motion.span
+              className="font-black text-lg tracking-tight"
+              variants={{
+                idle: { x: 0 },
+                hovered: {
+                  x: [0, 2, 0],
+                  transition: { duration: 0.4, delay: 0.1 },
+                },
+              }}
+            >
+              Fox<motion.span
+                className="text-primary inline-block"
+                variants={{
+                  idle: { color: "#FF6B00" },
+                  hovered: {
+                    color: ["#FF6B00", "#FF8C00", "#FF6B00"],
+                    transition: { duration: 0.5 },
+                  },
+                }}
+              >Prompt</motion.span>
+            </motion.span>
           </motion.div>
         </Link>
 
