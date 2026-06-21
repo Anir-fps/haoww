@@ -2,16 +2,16 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Sparkles, ImagePlus, X, Loader2, CheckCircle2 } from "lucide-react";
+import { Upload, Sparkles, ImagePlus, X, Loader2, CheckCircle2, ImageIcon, Type, Tag, FolderOpen } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
 import { useCreatePrompt, useListCategories, getListPromptsQueryKey } from "@workspace/api-client-react";
-import { useAuth } from "@clerk/react";
+import { useAuth, useClerk } from "@clerk/react";
 import { Navbar } from "@/components/Navbar";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { useLocation, Link } from "wouter";
+import { useLocation } from "wouter";
 
 const schema = z.object({
   title: z.string().optional(),
@@ -197,6 +197,7 @@ function ImageUploader({
 
 export default function SubmitPage() {
   const { isSignedIn } = useAuth();
+  const { openSignIn } = useClerk();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const qc = useQueryClient();
@@ -214,15 +215,42 @@ export default function SubmitPage() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="max-w-md mx-auto px-4 py-24 text-center">
-          <Sparkles className="w-12 h-12 mx-auto mb-4 text-primary" />
-          <h2 className="text-2xl font-bold mb-2">Sign in to submit</h2>
-          <p className="text-muted-foreground mb-6">Share your prompts with the community.</p>
-          <Link href="/sign-in">
-            <span className="inline-block px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 cursor-pointer transition-colors">
-              Sign in
-            </span>
-          </Link>
+        <div className="max-w-lg mx-auto px-4 py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-card border border-card-border rounded-2xl p-10 text-center shadow-sm"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
+              <Upload className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-black mb-2">Share your prompt</h2>
+            <p className="text-muted-foreground mb-8 max-w-xs mx-auto">
+              Sign in to upload your own AI-generated photo and the prompt that created it.
+            </p>
+
+            <div className="grid grid-cols-3 gap-3 mb-8 text-left">
+              {[
+                { icon: Type, label: "Write your prompt", desc: "The exact text you used" },
+                { icon: ImageIcon, label: "Upload your photo", desc: "Drag & drop or browse" },
+                { icon: Sparkles, label: "Go live instantly", desc: "Visible to everyone" },
+              ].map(({ icon: Icon, label, desc }) => (
+                <div key={label} className="bg-background rounded-xl p-3 border border-border">
+                  <Icon className="w-4 h-4 text-primary mb-1.5" />
+                  <p className="text-xs font-semibold text-foreground">{label}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => openSignIn({ afterSignInUrl: "/submit", afterSignUpUrl: "/submit" })}
+              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-all"
+            >
+              Sign in to submit
+            </button>
+            <p className="text-xs text-muted-foreground mt-3">Free · No credit card required</p>
+          </motion.div>
         </div>
       </div>
     );
