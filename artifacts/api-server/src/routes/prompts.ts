@@ -1,6 +1,14 @@
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { db, promptsTable, usersTable, promptLikesTable } from "@workspace/db";
+
+function safeGetAuth(req: Parameters<typeof getAuth>[0]): { userId: string | null } {
+  try {
+    return getAuth(req);
+  } catch {
+    return { userId: null };
+  }
+}
 import { eq, sql, and } from "drizzle-orm";
 
 const router = Router();
@@ -49,7 +57,7 @@ function baseQuery(clerkId?: string) {
 
 // GET /prompts
 router.get("/", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   const { category, search, sort = "newest", page = "1", limit = "20" } = req.query as Record<string, string>;
   const pageNum = Math.max(1, parseInt(page));
   const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
@@ -79,7 +87,7 @@ router.get("/", async (req, res) => {
 
 // POST /prompts
 router.post("/", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   const { title, text, enhancedText, imageUrl, videoUrl, categoryId, tags } = req.body as {
@@ -104,7 +112,7 @@ router.post("/", async (req, res) => {
 
 // GET /prompts/featured
 router.get("/featured", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   const limit = Math.min(50, parseInt((req.query.limit as string) || "8"));
   const rows = await db.execute(`${baseQuery(userId ?? undefined)} WHERE p.is_featured = true ORDER BY p.created_at DESC LIMIT ${limit}`);
   return res.json((rows.rows as Record<string, unknown>[]).map(formatPrompt));
@@ -112,7 +120,7 @@ router.get("/featured", async (req, res) => {
 
 // GET /prompts/trending
 router.get("/trending", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   const limit = Math.min(50, parseInt((req.query.limit as string) || "10"));
   const rows = await db.execute(`${baseQuery(userId ?? undefined)} ORDER BY p.copy_count DESC LIMIT ${limit}`);
   return res.json((rows.rows as Record<string, unknown>[]).map(formatPrompt));
@@ -120,7 +128,7 @@ router.get("/trending", async (req, res) => {
 
 // GET /prompts/:id
 router.get("/:id", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
   const rows = await db.execute(`${baseQuery(userId ?? undefined)} WHERE p.id = ${id}`);
@@ -130,7 +138,7 @@ router.get("/:id", async (req, res) => {
 
 // PATCH /prompts/:id
 router.patch("/:id", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
@@ -161,7 +169,7 @@ router.patch("/:id", async (req, res) => {
 
 // DELETE /prompts/:id
 router.delete("/:id", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
@@ -199,7 +207,7 @@ router.post("/:id/copy", async (req, res) => {
 
 // POST /prompts/:id/like  — toggle like
 router.post("/:id/like", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   const id = parseInt(req.params.id);
@@ -232,7 +240,7 @@ router.post("/:id/like", async (req, res) => {
 
 // POST /prompts/:id/feature
 router.post("/:id/feature", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   const user = await db.select().from(usersTable).where(eq(usersTable.clerkId, userId)).limit(1);

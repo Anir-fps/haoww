@@ -3,10 +3,14 @@ import { getAuth } from "@clerk/express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
+function safeGetAuth(req: Parameters<typeof getAuth>[0]): { userId: string | null } {
+  try { return getAuth(req); } catch { return { userId: null }; }
+}
+
 const router = Router();
 
 router.post("/sync", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   const clerkUser = (req as unknown as { auth?: { sessionClaims?: Record<string, unknown> } }).auth?.sessionClaims;
@@ -42,7 +46,7 @@ router.post("/sync", async (req, res) => {
 });
 
 router.get("/me", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   const [user] = await db
@@ -64,7 +68,7 @@ router.get("/me", async (req, res) => {
 });
 
 router.patch("/me", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   const { username } = req.body as { username?: string };
@@ -80,7 +84,7 @@ router.patch("/me", async (req, res) => {
 });
 
 router.get("/me/prompts", async (req, res) => {
-  const { userId } = getAuth(req);
+  const { userId } = safeGetAuth(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   const rows = await db.execute(`
