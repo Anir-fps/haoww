@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Sparkles, Check, Star, Heart, ExternalLink, ChevronDown } from "lucide-react";
+import { Copy, Sparkles, Check, Star, Heart, ExternalLink, ChevronDown, Upload } from "lucide-react";
 import { useCopyPrompt, useLikePrompt } from "@workspace/api-client-react";
 import { useAuth } from "@clerk/react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import type { Prompt } from "@workspace/api-client-react";
 
 interface PromptCardProps {
@@ -106,6 +107,7 @@ export function PromptCard({ prompt, onEnhance }: PromptCardProps) {
   const { isSignedIn } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const isLiked = optimisticLiked ?? prompt.isLikedByMe ?? false;
   const likeCount = optimisticCount ?? prompt.likeCount ?? 0;
@@ -230,6 +232,14 @@ export function PromptCard({ prompt, onEnhance }: PromptCardProps) {
                       <Sparkles className="w-3 h-3" />
                       Enhance
                     </button>
+                    <button
+                      data-testid={`button-submit-${prompt.id}`}
+                      onClick={(e) => { e.stopPropagation(); setLocation("/submit"); }}
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 text-white text-xs font-semibold hover:bg-white/20 transition-colors"
+                    >
+                      <Upload className="w-3 h-3" />
+                      Submit
+                    </button>
                     <CreateMenu promptText={promptText} />
                   </div>
                 </motion.div>
@@ -240,11 +250,6 @@ export function PromptCard({ prompt, onEnhance }: PromptCardProps) {
 
         {/* Bottom bar — always visible */}
         <div className="p-3 space-y-2">
-          {/* Prompt text preview */}
-          <p className="text-xs text-muted-foreground font-mono leading-relaxed line-clamp-2">
-            {promptText}
-          </p>
-
           {/* Creator row */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 min-w-0">
